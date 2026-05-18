@@ -1,28 +1,49 @@
-# 🥊 CodeKO
+# 🥊 CodeKO - Quick Start
 
-Plataforma gamificada de aprendizado de T.I. com temática de boxe.
-
-## Setup
+## Iniciar a aplicação
 
 ```bash
-# 1. Clone o repositório
-git clone https://github.com/Muryllohenrique0611/codeko.git
-cd codeko
-
-# 2. Crie e ative o ambiente virtual
-python -m venv venv
-venv\Scripts\activate      # Windows
-source venv/bin/activate   # Mac/Linux
-
-# 3. Instale as dependências
-pip install -r requirements.txt
-
-# 4. Configure as variáveis de ambiente
-cp .env.example .env
-# Edite o .env com suas credenciais do Google OAuth
-
-# 5. Rode a aplicação
+cd d:\python\Projeto\codeko
 python run.py
 ```
 
-Acesse: http://localhost:5000
+A aplicação estará em: **http://localhost:5000**
+
+## O que você verá
+
+1. **Landing Page** → Clique em "Começar Agora"
+2. **Login** → Clique em "Entrar com Google"
+3. **Dashboard** → Seu perfil com XP, categoria, estatísticas
+4. **Módulos** → Escolha um módulo para responder questões
+5. **Quiz** → Responda as 10 questões do dia
+
+## Arquivos importantes
+
+```
+.env                    ← Suas credenciais (NÃO fazer commit!)
+run.py                  ← Inicia a app
+seed.py                 ← Popula o banco com questões
+app/templates/          ← Páginas HTML
+app/routes/             ← Lógica das rotas
+app/models/             ← Estrutura do banco de dados
+```
+
+## Próximas implementações
+
+- [ ] Sistema de XP & Ranking
+- [ ] Execução segura de código Python
+- [ ] Desafio de Ressurreição
+- [ ] Disputa pelo cinturão
+- [ ] Histórico de batalhas
+
+## Status do projeto
+
+✅ 210 questões (14 módulos × 15 questões)
+✅ Frontend com 6 páginas
+✅ Autenticação Google OAuth
+⏳ Sistema de XP (próximo)
+⏳ Execução de código (próximo)
+
+---
+
+**Desenvolvido com ❤️ para boxeadores da programação**
