@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Home - CodeKO{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h1 style="margin-bottom: 1rem;">Bem-vindo, {{ user.name }}!</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="color: #666; font-size: 0.9rem;">Categoria</p>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">
+                    {% if user.category == 'iniciante' %}
+                        🟢 Iniciante
+                    {% elif user.category == 'intermediario' %}
+                        🟡 Intermediário
+                    {% else %}
+                        🔴 PRO
+                    {% endif %}
+                </p>
+            </div>
+
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="color: #666; font-size: 0.9rem;">XP Total</p>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">{{ user.xp }} XP</p>
+            </div>
+
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="color: #666; font-size: 0.9rem;">Posição no Ranking</p>
+                <p style="font-size: 1.5rem; font-weight: bold;">#{%if user.ranking_position %}{{ user.ranking_position }}{% else %}—{% endif %}</p>
+            </div>
+
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="color: #666; font-size: 0.9rem;">Combo Diário</p>
+                <p style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">{{ user.streak }}🔥</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem;">Estatísticas de Batalha</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="font-size: 2rem; font-weight: bold;">{{ user.fights }}</p>
+                <p style="color: #666;">Lutas</p>
+            </div>
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="font-size: 2rem; font-weight: bold; color: #4CAF50;">{{ user.wins }}</p>
+                <p style="color: #666;">Vitórias</p>
+            </div>
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="font-size: 2rem; font-weight: bold; color: var(--primary);">{{ user.knockouts }}</p>
+                <p style="color: #666;">Nocautes</p>
+            </div>
+            <div style="background: var(--light); padding: 1rem; border-radius: 4px;">
+                <p style="font-size: 2rem; font-weight: bold; color: #FF9800;">{{ user.losses }}</p>
+                <p style="color: #666;">Derrotas</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="text-align: center;">
+        <h2 style="margin-bottom: 1.5rem;">Próximo Passo</h2>
+        <p style="margin-bottom: 1.5rem;">Escolha um módulo da sua categoria para começar as questões de hoje.</p>
+        <a href="{{ url_for('main.modules') }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">Ir para Módulos</a>
+    </div>
+
+    {% if user.is_champion %}
+    <div class="card" style="background: linear-gradient(135deg, #FFE66D 0%, #FF6B6B 100%); color: white;">
+        <h2 style="text-align: center; margin-bottom: 1rem;">👑 Você é o Campeão!</h2>
+        <p style="text-align: center;">Defenda seu cinturão esta semana contra os desafiantes.</p>
+    </div>
+    {% endif %}
+{% endblock %}

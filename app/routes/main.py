@@ -35,3 +35,11 @@ def modules():
     from app.models import Module
     modules = Module.query.filter_by(category=current_user.category).order_by(Module.order).all()
     return render_template("modules.html", user=current_user, modules=modules)
+
+
+@main_bp.route("/quiz/<int:module_id>")
+@login_required
+def quiz(module_id):
+    from app.models import Module
+    module = Module.query.get_or_404(module_id)
+    return render_template("quiz.html", user=current_user, module=module, module_id=module_id)

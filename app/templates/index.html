@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}CodeKO - Bem-vindo{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; text-align: center;">
+            [CODEKO]<br>
+            <span style="font-size: 1.2rem; color: var(--secondary);">O Boxeador da Programação</span>
+        </h1>
+
+        <p style="text-align: center; margin: 1.5rem 0; font-size: 1.1rem; line-height: 1.6;">
+            Aprenda programação como se estivesse em um ringue de boxe. Supere desafios,
+            enfrente o campeão e conquiste o cinturão. Cada questão correta é um soco certeiro!
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Começar Agora</a>
+            <a href="#features" class="btn btn-secondary">Saiba Mais</a>
+        </div>
+    </div>
+
+    <div id="features" class="card">
+        <h2 style="margin-bottom: 1.5rem;">🥊 O que é CodeKO?</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">14 Módulos</h3>
+                <p>De Hardware até Algoritmos Avançados. Estruturados em 3 categorias: Iniciante, Intermediário e Pro.</p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">210 Questões</h3>
+                <p>15 questões por módulo. Teóricas, de código e com execução ao vivo em Python.</p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Sistema de XP</h3>
+                <p>Ganhe XP com cada tarefa. Suba no ranking e dispute o cinturão com o campeão.</p>
+            </div>
+
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 0.5rem;">Desafio Diário</h3>
+                <p>10 questões por dia até meia-noite. Mantenha seu combo e a consistência.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-bottom: 1rem;">Progresso no Jogo</h2>
+        <div style="background: var(--light); padding: 1.5rem; border-radius: 4px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <span>Completa todos os módulos INICIANTE</span>
+                <span style="color: var(--primary);">✓</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <span>Recapitulação geral INICIANTE → INTERMEDIÁRIO</span>
+                <span style="color: var(--text);">⏳</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Desbloqueie o cinturão na categoria PRO</span>
+                <span style="color: var(--secondary);">🏆</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}

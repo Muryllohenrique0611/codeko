@@ -54,7 +54,35 @@ def get_modules():
 
 # --- Questões ---
 
-@api_bp.route("/questions/daily")
+@api_bp.route("/questions")
+@login_required
+def get_questions():
+    import json
+    import random
+
+    module_id = request.args.get("module_id", type=int)
+    limit = request.args.get("limit", default=10, type=int)
+
+    if not module_id:
+        return jsonify({"error": "module_id is required"}), 400
+
+    questions = Question.query.filter_by(module_id=module_id).limit(limit).all()
+
+    result = []
+    for q in questions:
+        result.append({
+            "id": q.id,
+            "type": q.type,
+            "statement": q.statement,
+            "code_snippet": q.code_snippet,
+            "options": json.loads(q.options) if q.options else [],
+            "correct_answer": q.correct_answer,
+            "explanation": q.explanation,
+            "level": q.level,
+        })
+
+    random.shuffle(result)
+    return jsonify(result)
 @login_required
 def get_daily_questions():
     import random
