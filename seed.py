@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Script para popular o banco de dados com módulos e questões.
 Execute: python seed.py
@@ -37,7 +38,7 @@ def seed_modules():
             db.session.add(Module(**m))
 
     db.session.commit()
-    print(f"✅ {len(modules)} módulos inseridos.")
+    print(f"[OK] {len(modules)} módulos inseridos.")
 
 
 def seed_questions():
@@ -2495,6 +2496,191 @@ def seed_questions():
             "explanation": "A ordem correta é: try (código arriscado) → except (trata erro) → else (sem erro) → finally (sempre executa).",
         },
 
+        # ══════════════════════════════════════════
+        # MÓDULO 14 — Recapitulação Geral (15 questões)
+        # ══════════════════════════════════════════
+
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual é o valor de 2 ** 3 + 1 em Python?",
+            "code_snippet": None,
+            "correct_answer": "9",
+            "options": json.dumps(["7", "8", "9", "16"]),
+            "explanation": "2 ** 3 = 8 (exponenciação), 8 + 1 = 9. Exponenciação tem precedência sobre adição.",
+        },
+        {
+            "module_number": 14,
+            "type": "code_gap",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Complete o código para criar uma lista com números de 1 a 5:\n\n___ = [1, 2, 3, 4, 5]",
+            "code_snippet": "___ = [1, 2, 3, 4, 5]",
+            "correct_answer": "numeros",
+            "options": json.dumps(["lista", "numeros", "dados", "array"]),
+            "explanation": "Qualquer nome de variável válido funciona (lista, numeros, dados). 'numeros' é apenas uma sugestão descritiva.",
+        },
+        {
+            "module_number": 14,
+            "type": "true_false",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Em Python, a complexidade de tempo de busca linear em uma lista é O(n).",
+            "code_snippet": None,
+            "correct_answer": "verdadeiro",
+            "options": json.dumps(["verdadeiro", "falso"]),
+            "explanation": "A busca linear percorre cada elemento até encontrar o alvo — O(n) no pior caso.",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual é a saída do código abaixo?\n\nfor i in range(3):\n    print(i, end=' ')",
+            "code_snippet": None,
+            "correct_answer": "0 1 2 ",
+            "options": json.dumps([
+                "0 1 2",
+                "0 1 2 ",
+                "1 2 3",
+                "0 1 2 3"
+            ]),
+            "explanation": "range(3) gera 0, 1, 2. O end=' ' coloca um espaço após cada número.",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual é a saída de len([1, 2, 3])?",
+            "code_snippet": None,
+            "correct_answer": "3",
+            "options": json.dumps(["1", "2", "3", "4"]),
+            "explanation": "len() retorna o número de elementos na lista — 3 elementos.",
+        },
+        {
+            "module_number": 14,
+            "type": "code_gap",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Complete para verificar se um valor existe em um dicionário:\n\nif '___ ' in meu_dict:\n    print('Existe')",
+            "code_snippet": "if '___ ' in meu_dict:",
+            "correct_answer": "chave",
+            "options": json.dumps(["chave", "valor", "item", "key"]),
+            "explanation": "O operador 'in' verifica se uma chave existe no dicionário, não um valor.",
+        },
+        {
+            "module_number": 14,
+            "type": "true_false",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Uma classe pode herdar de mais de uma classe em Python (herança múltipla).",
+            "code_snippet": None,
+            "correct_answer": "verdadeiro",
+            "options": json.dumps(["verdadeiro", "falso"]),
+            "explanation": "Python suporta herança múltipla: class MinhaClasse(Classe1, Classe2).",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual é a complexidade de tempo de busca binária?",
+            "code_snippet": None,
+            "correct_answer": "O(log n)",
+            "options": json.dumps(["O(1)", "O(log n)", "O(n)", "O(n²)"]),
+            "explanation": "Busca binária divide o espaço de busca pela metade a cada iteração — O(log n).",
+        },
+        {
+            "module_number": 14,
+            "type": "code_gap",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Complete para criar uma função recursiva que calcula fatorial:\n\ndef fatorial(n):\n    if n <= 1:\n        return 1\n    else:\n        return n * ___(n - 1)",
+            "code_snippet": "return n * ___(n - 1)",
+            "correct_answer": "fatorial",
+            "options": json.dumps(["fatorial", "factorial", "calcula", "recursao"]),
+            "explanation": "A função chama a si mesma com n-1 para calcular o fatorial recursivamente.",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "O que retorna sorted([3, 1, 2])?",
+            "code_snippet": None,
+            "correct_answer": "[1, 2, 3]",
+            "options": json.dumps([
+                "[3, 1, 2]",
+                "[1, 2, 3]",
+                "None (lista modificada no lugar)",
+                "Erro — sorted() não existe"
+            ]),
+            "explanation": "sorted() retorna uma nova lista ordenada, não modifica a original.",
+        },
+        {
+            "module_number": 14,
+            "type": "true_false",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Um set em Python pode conter elementos duplicados.",
+            "code_snippet": None,
+            "correct_answer": "falso",
+            "options": json.dumps(["verdadeiro", "falso"]),
+            "explanation": "Sets removem duplicatas automaticamente — cada elemento é único.",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual é a saída do código abaixo?\n\nx = 5\nif x > 3:\n    print('A')\nelif x > 0:\n    print('B')\nelse:\n    print('C')",
+            "code_snippet": None,
+            "correct_answer": "A",
+            "options": json.dumps(["A", "B", "C", "AB"]),
+            "explanation": "x = 5, que é > 3, então imprime 'A'. Os blocos elif/else não são executados.",
+        },
+        {
+            "module_number": 14,
+            "type": "code_gap",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Complete para usar list comprehension:\n\n___ = [x * 2 for x in range(5)]",
+            "code_snippet": "___ = [x * 2 for x in range(5)]",
+            "correct_answer": "pares",
+            "options": json.dumps(["lista", "pares", "duplicados", "resultado"]),
+            "explanation": "List comprehension cria uma nova lista duplicando cada número de 0-4.",
+        },
+        {
+            "module_number": 14,
+            "type": "true_false",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "A complexidade de tempo de adicionar um elemento ao final de uma lista em Python é O(1).",
+            "code_snippet": None,
+            "correct_answer": "verdadeiro",
+            "options": json.dumps(["verdadeiro", "falso"]),
+            "explanation": "Adicionar ao final de uma lista (.append) é O(1) em Python — operação amortizada constante.",
+        },
+        {
+            "module_number": 14,
+            "type": "multiple_choice",
+            "level": "pro",
+            "lang": "pt",
+            "statement": "Qual algoritmo de ordenação tem complexidade O(n log n) no pior caso?",
+            "code_snippet": None,
+            "correct_answer": "Merge sort",
+            "options": json.dumps([
+                "Bubble sort",
+                "Insertion sort",
+                "Merge sort",
+                "Selection sort"
+            ]),
+            "explanation": "Merge sort sempre executa em O(n log n), mesmo no pior caso. Bubble sort é O(n²).",
+        },
+
     ]
 
     modules_map = {m.number: m.id for m in Module.query.all()}
@@ -2503,7 +2689,7 @@ def seed_questions():
     for q in questions:
         module_id = modules_map.get(q["module_number"])
         if not module_id:
-            print(f"⚠️  Módulo {q['module_number']} não encontrado, pulando questão.")
+            print(f"[WARNING] Módulo {q['module_number']} não encontrado, pulando questão.")
             continue
 
         exists = Question.query.filter_by(
@@ -2525,12 +2711,12 @@ def seed_questions():
             count += 1
 
     db.session.commit()
-    print(f"✅ {count} questões inseridas.")
+    print(f"[OK] {count} questões inseridas.")
 
 
 if __name__ == "__main__":
     with app.app_context():
-        print("🥊 Iniciando seed do CodeKO...")
+        print("[CODEKO] Iniciando seed do CodeKO...")
         seed_modules()
         seed_questions()
-        print("🏆 Seed concluído com sucesso!")
+        print("[SUCCESS] Seed concluído com sucesso!")
