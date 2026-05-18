@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, session, request, flash
+from flask import Blueprint, redirect, url_for, session, request, flash, render_template
 from flask_login import login_user, logout_user, login_required
 from app.models import User
 from app import db
@@ -18,6 +18,10 @@ def get_google_provider_cfg():
 
 @auth_bp.route("/login")
 def login():
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        flash("Credenciais do Google não configuradas. Por favor, configure GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET.", "error")
+        return render_template("auth_login.html"), 500
+
     from oauthlib.oauth2 import WebApplicationClient
     client = WebApplicationClient(GOOGLE_CLIENT_ID)
     google_cfg = get_google_provider_cfg()
