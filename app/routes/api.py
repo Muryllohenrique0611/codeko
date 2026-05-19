@@ -130,56 +130,135 @@ def get_daily_questions():
 @api_bp.route("/progress/submit", methods=["POST"])
 @login_required
 def submit_task():
+    from datetime import datetime, timedelta
+
     data = request.get_json()
+    module_id = data.get("module_id")
     correct = data.get("correct", 0)
     total = data.get("total", 10)
-    score = correct / total
+    score = correct / total if total > 0 else 0
 
     today = date.today()
 
+    # Verificar se já fez tarefa hoje
+    last_fight = BattleHistory.query.filter_by(
+        user_id=current_user.id,
+        type="daily_task"
+    ).order_by(BattleHistory.created_at.desc()).first()
+
+    if last_fight and last_fight.created_at.date() == today:
+        return jsonify({"error": "Você já completou sua tarefa de hoje!"}), 400
+
     # Registrar resultado na ficha do lutador
     current_user.fights += 1
+
+    # Atualizar combo (streak)
+    yesterday = today - timedelta(days=1)
+    if last_fight and last_fight.created_at.date() == yesterday:
+        # Mantém o combo
+        current_user.streak += 1
+    elif not last_fight or last_fight.created_at.date() < yesterday:
+        # Reseta o combo
+        current_user.streak = 1
+    else:
+        current_user.streak = 1
+
     current_user.last_task_date = today
 
+    # Calcular XP baseado no resultado
     if score == 1.0:
         current_user.knockouts += 1
-        current_user.xp += 150
+        xp_gained = 150  # Nocaute = perfeição
         result = "knockout"
-        xp_gained = 150
-    else:
+    elif score >= 0.6:
         current_user.wins += 1
-        current_user.xp += 100
+        xp_gained = 100  # Vitória
         result = "win"
-        xp_gained = 100
+    else:
+        current_user.losses += 1
+        xp_gained = -50  # Derrota
+        result = "loss"
 
-    current_user.streak += 1
+    # Adicionar combo bonus (5 XP por dia consecutivo)
+    combo_bonus = current_user.streak * 5
+    total_xp_gained = xp_gained + combo_bonus
 
+    current_user.xp += total_xp_gained
+
+    # Registrar na história de batalhas
     battle = BattleHistory(
         user_id=current_user.id,
         type="daily_task",
         result=result,
         score=score,
-        xp_gained=xp_gained,
+        xp_gained=total_xp_gained,
     )
+
+    # Registrar progresso do módulo
+    if module_id:
+        module = Module.query.get(module_id)
+        if module:
+            progress = UserProgress.query.filter_by(
+                user_id=current_user.id,
+                module_id=module_id
+            ).first()
+
+            if not progress:
+                progress = UserProgress(
+                    user_id=current_user.id,
+                    module_id=module_id,
+                    completed=score >= 0.6,
+                    score=score,
+                    completed_at=datetime.utcnow() if score >= 0.6 else None
+                )
+                db.session.add(progress)
+            else:
+                progress.score = max(progress.score, score)
+                if score >= 0.6:
+                    progress.completed = True
+                    progress.completed_at = datetime.utcnow()
+
     db.session.add(battle)
     db.session.commit()
 
+    # Atualizar ranking
+    update_ranking()
+
     return jsonify({
         "result": result,
-        "xp_gained": xp_gained,
+        "xp_gained": total_xp_gained,
+        "combo_bonus": combo_bonus,
         "total_xp": current_user.xp,
         "streak": current_user.streak,
+        "ranking_position": current_user.ranking_position,
     })
 
 
 # --- Ranking ---
 
+def update_ranking():
+    """Atualiza posições de ranking por categoria"""
+    from app.models import User
+
+    for category in ["iniciante", "intermediario", "pro"]:
+        users = User.query.filter_by(category=category).order_by(User.xp.desc()).all()
+        for position, user in enumerate(users, 1):
+            user.ranking_position = position
+
+    db.session.commit()
+
+
 @api_bp.route("/ranking/<category>")
 @login_required
 def get_ranking(category):
     from app.models import User
+
+    if category not in ["iniciante", "intermediario", "pro"]:
+        return jsonify({"error": "Categoria inválida"}), 400
+
     users = User.query.filter_by(category=category).order_by(User.xp.desc()).limit(20).all()
     result = []
+
     for i, u in enumerate(users):
         result.append({
             "position": i + 1,
@@ -188,6 +267,10 @@ def get_ranking(category):
             "xp": u.xp,
             "knockouts": u.knockouts,
             "wins": u.wins,
+            "losses": u.losses,
+            "streak": u.streak,
             "is_champion": u.is_champion,
+            "is_current_user": u.id == current_user.id,
         })
+
     return jsonify(result)
