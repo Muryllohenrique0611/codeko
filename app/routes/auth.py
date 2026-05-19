@@ -5,6 +5,9 @@ from app import db
 import requests
 import os
 
+# Permitir HTTP em desenvolvimento
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
+
 auth_bp = Blueprint("auth", __name__)
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
