@@ -257,6 +257,7 @@
         let questions = [];
         let answers = {};
         let moduleId = {{ module_id }};
+        let quizFinished = false;
 
         async function loadQuestions() {
             const response = await fetch(`/api/questions?module_id=${moduleId}&limit=10`);
@@ -265,6 +266,8 @@
         }
 
         function displayQuestion() {
+            if (quizFinished) return;
+
             const q = questions[currentQuestion];
             document.getElementById('questionStatement').textContent = q.statement;
             document.getElementById('questionCounter').textContent = `${currentQuestion + 1}/${questions.length}`;
@@ -301,6 +304,61 @@
 
             document.getElementById('explanation').classList.remove('show');
             document.getElementById('quizForm').style.display = 'block';
+            document.getElementById('submitBtn').textContent = 'Responder';
+        }
+
+        async function submitQuiz() {
+            const correctCount = Object.values(answers).filter(a => a.correct).length;
+
+            const response = await fetch('/api/progress/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    module_id: moduleId,
+                    correct: correctCount,
+                    total: questions.length
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.error || 'Erro ao submeter');
+                return;
+            }
+
+            // Mostrar resultado
+            const resultHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+                        ${result.result === 'knockout' ? '💥 NOCAUTE!' : result.result === 'win' ? '✅ VITÓRIA!' : '❌ DERROTA'}
+                    </h1>
+                    <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
+                        ${correctCount} de ${questions.length} respostas corretas
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+                        <div style="background: #FFE66D; padding: 1.5rem; border-radius: 8px;">
+                            <p style="color: #666; font-size: 0.9rem;">XP Ganho</p>
+                            <p style="font-size: 2rem; font-weight: bold; color: var(--primary);">+${result.xp_gained}</p>
+                            ${result.combo_bonus > 0 ? `<p style="font-size: 0.9rem; color: #FF6B6B;">+${result.combo_bonus} bonus combo!</p>` : ''}
+                        </div>
+                        <div style="background: var(--secondary); color: white; padding: 1.5rem; border-radius: 8px;">
+                            <p style="font-size: 0.9rem;">Seu XP Total</p>
+                            <p style="font-size: 2rem; font-weight: bold;">${result.total_xp}</p>
+                            <p style="font-size: 0.9rem;">Posição: #${result.ranking_position}</p>
+                        </div>
+                    </div>
+                    <div style="background: var(--light); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
+                        <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">
+                            🔥 Combo: ${result.streak} dias
+                        </p>
+                        <p style="color: #666;">Continue respondendo todos os dias para manter seu combo!</p>
+                    </div>
+                    <a href="${'{{ url_for("main.home") }}'}" class="btn btn-primary" style="margin-top: 1.5rem;">Voltar ao Dashboard</a>
+                </div>
+            `;
+
+            document.querySelector('.question-panel').innerHTML = resultHTML;
         }
 
         document.getElementById('quizForm').addEventListener('submit', async (e) => {
@@ -321,24 +379,36 @@
 
             answers[q.id] = { answer, correct: answer === q.correct_answer };
 
-            if (answers[q.id].correct) {
-                document.getElementById('correctCount').textContent = Object.values(answers).filter(a => a.correct).length;
-            }
+            const correctCount = Object.values(answers).filter(a => a.correct).length;
+            document.getElementById('correctCount').textContent = correctCount;
 
             document.getElementById('explanation').classList.add('show');
             document.getElementById('explanationText').textContent = q.explanation;
-            document.getElementById('submitBtn').textContent = currentQuestion < questions.length - 1 ? 'Próxima' : 'Finalizar';
 
             if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                setTimeout(displayQuestion, 2000);
+                document.getElementById('submitBtn').textContent = 'Próxima';
+                setTimeout(() => {
+                    currentQuestion++;
+                    displayQuestion();
+                }, 2000);
             } else {
-                document.getElementById('submitBtn').textContent = 'Finalizar Quiz';
+                quizFinished = true;
+                document.getElementById('submitBtn').textContent = 'Finalizar e Enviar';
+                document.getElementById('skipBtn').style.display = 'none';
+            }
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', async (e) => {
+            if (quizFinished && e.target.textContent === 'Finalizar e Enviar') {
+                e.preventDefault();
+                document.getElementById('submitBtn').disabled = true;
+                await submitQuiz();
             }
         });
 
         document.getElementById('skipBtn').addEventListener('click', () => {
             if (currentQuestion < questions.length - 1) {
+                answers[questions[currentQuestion].id] = { answer: null, correct: false };
                 currentQuestion++;
                 displayQuestion();
             }
