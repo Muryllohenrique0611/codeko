@@ -111,49 +111,84 @@
                 <tr>
                     <th style="width: 80px;">Posição</th>
                     <th>Jogador</th>
-                    <th style="width: 150px;">XP</th>
-                    <th style="width: 150px;">Lutas</th>
-                    <th style="width: 150px;">Taxa</th>
+                    <th style="width: 120px;">XP</th>
+                    <th style="width: 100px;">Lutas</th>
+                    <th style="width: 80px;">Combo</th>
+                    <th style="width: 120px;">Taxa</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for idx in range(1, 11) %}
-                    <tr {% if current_user.ranking_position == idx %}class="current-user"{% endif %}>
-                        <td>
-                            <span class="rank-number {% if idx == 1 %}rank-1{% elif idx == 2 %}rank-2{% elif idx == 3 %}rank-3{% endif %}">
-                                {% if idx == 1 %}🥇{% elif idx == 2 %}🥈{% elif idx == 3 %}🥉{% else %}{{ idx }}{% endif %}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="player-name">
-                                <span>Jogador {{ idx }}</span>
-                                {% if idx == 1 %}<span class="champion-badge">CAMPEÃO</span>{% endif %}
-                            </div>
-                        </td>
-                        <td>{{ 5000 - idx * 100 }} XP</td>
-                        <td>{{ 50 - idx * 2 }} lutas</td>
-                        <td>
-                            <div style="background: var(--light); height: 20px; border-radius: 10px; overflow: hidden;">
-                                <div style="background: linear-gradient(90deg, var(--secondary), var(--primary)); height: 100%; width: {{ 95 - idx * 3 }}%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
+            <tbody id="rankingBody">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">
+                        Carregando ranking...
+                    </td>
+                </tr>
             </tbody>
         </table>
-
-        <p style="text-align: center; color: #666; margin-top: 2rem; font-size: 0.9rem;">
-            Dados simulados. Sistema de ranking será implementado com a lógica de XP.
-        </p>
     </div>
 
     <div class="card" style="background: var(--light); text-align: center;">
         <h3 style="margin-bottom: 1rem;">🎯 Como subir no ranking?</h3>
         <ul style="text-align: left; display: inline-block; line-height: 1.8;">
-            <li>Ganhe XP completando tarefas diárias</li>
-            <li>Nocautes (perfeição) valem mais XP</li>
-            <li>Use o Desafio de Ressurreição para recuperar dias perdidos</li>
-            <li>Top 3 PRO disputam o cinturão semanal</li>
+            <li><strong>Nocaute (100%):</strong> +150 XP</li>
+            <li><strong>Vitória (60%+):</strong> +100 XP</li>
+            <li><strong>Derrota (&lt;60%):</strong> -50 XP</li>
+            <li><strong>Combo Bonus:</strong> +5 XP por dia de streak</li>
         </ul>
     </div>
+
+    <script>
+        async function loadRanking() {
+            const category = '{{ current_user.category }}';
+            const response = await fetch(`/api/ranking/${category}`);
+            const ranking = await response.json();
+
+            const tbody = document.getElementById('rankingBody');
+            tbody.innerHTML = '';
+
+            if (ranking.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem;">Nenhum jogador ainda</td></tr>';
+                return;
+            }
+
+            ranking.forEach((player, idx) => {
+                const taxa = player.fights > 0
+                    ? ((player.wins + player.knockouts) / player.fights * 100).toFixed(0)
+                    : 0;
+
+                const row = document.createElement('tr');
+                if (player.is_current_user) {
+                    row.className = 'current-user';
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <span class="rank-number ${idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : ''}">
+                            ${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="player-name">
+                            <span>${player.name}</span>
+                            ${player.is_champion ? '<span class="champion-badge">CAMPEÃO</span>' : ''}
+                        </div>
+                    </td>
+                    <td><strong>${player.xp} XP</strong></td>
+                    <td>${player.wins + player.knockouts}/${player.fights}</td>
+                    <td>${player.streak}🔥</td>
+                    <td>
+                        <div style="background: var(--light); height: 20px; border-radius: 10px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, var(--secondary), var(--primary)); height: 100%; width: ${taxa}%;"></div>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        loadRanking();
+        // Atualizar ranking a cada 30 segundos
+        setInterval(loadRanking, 30000);
+    </script>
 {% endblock %}
