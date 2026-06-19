@@ -85,6 +85,9 @@ def get_questions():
 
     random.shuffle(result)
     return jsonify(result)
+
+
+@api_bp.route("/questions/daily")
 @login_required
 def get_daily_questions():
     import random
