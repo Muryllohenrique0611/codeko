@@ -278,6 +278,109 @@ def validate_code():
 
     return jsonify(validation)
 
+
+# --- Desafio de Ressurreição ---
+
+@api_bp.route("/resurrection/status", methods=["GET"])
+@login_required
+def resurrection_status():
+    """Retorna se o usuário pode usar o Desafio de Ressurreição."""
+    can_use = ResurrectionChallenge.can_use_resurrection(current_user)
+
+    return jsonify({
+        "can_use": can_use,
+        "resurrection_used_week": current_user.resurrection_used_week,
+        "message": "Pode usar" if can_use else "Ja usou esta semana",
+    })
+
+
+@api_bp.route("/resurrection/activate", methods=["POST"])
+@login_required
+def activate_resurrection():
+    """Ativa o Desafio de Ressurreição."""
+    result = ResurrectionChallenge.activate_resurrection(current_user)
+
+    if result["success"]:
+        return jsonify(result)
+    else:
+        return jsonify(result), 400
+
+
+@api_bp.route("/resurrection/submit", methods=["POST"])
+@login_required
+def submit_resurrection():
+    """Submete resultado do Desafio de Ressurreição."""
+    data = request.get_json()
+    correct = data.get("correct", 0)
+    total = data.get("total", 15)
+    score = correct / total if total > 0 else 0
+
+    result = ResurrectionChallenge.process_resurrection_result(current_user, score)
+
+    return jsonify(result)
+
+
+# --- Sistema do Cinturão ---
+
+@api_bp.route("/belt/status", methods=["GET"])
+@login_required
+def belt_status():
+    """Retorna status do desafio do cinturão."""
+    if current_user.category != "pro":
+        return jsonify({"eligible": False, "reason": "Apenas PRO pode desafiar"}), 400
+
+    is_eligible = BeltChampion.is_eligible_to_challenge(current_user)
+    champion = BeltChampion.get_champion(current_user.category)
+
+    return jsonify({
+        "eligible": is_eligible,
+        "ranking_position": current_user.ranking_position,
+        "can_challenge": current_user.ranking_position <= BeltChampion.TOP_ELIGIBLE,
+        "used_this_week": current_user.champion_challenge_used_week,
+        "champion": {
+            "name": champion.name if champion else "Vago",
+            "xp": champion.xp if champion else 0,
+        },
+    })
+
+
+@api_bp.route("/belt/challenge", methods=["POST"])
+@login_required
+def initiate_belt_challenge():
+    """Inicia desafio do cinturão."""
+    if current_user.category != "pro":
+        return jsonify({"success": False, "error": "Apenas PRO"}), 400
+
+    champion = BeltChampion.get_champion(current_user.category)
+    if not champion:
+        return jsonify({"success": False, "error": "Nao ha campeao"}), 400
+
+    result = BeltChampion.initiate_challenge(current_user, champion)
+
+    if result["success"]:
+        return jsonify(result)
+    else:
+        return jsonify(result), 400
+
+
+@api_bp.route("/belt/submit", methods=["POST"])
+@login_required
+def submit_belt_challenge():
+    """Submete resultado do desafio do cinturão."""
+    data = request.get_json()
+    challenger_score = data.get("challenger_score", 0)
+    champion_score = data.get("champion_score", 0)
+
+    champion = BeltChampion.get_champion(current_user.category)
+    if not champion:
+        return jsonify({"success": False, "error": "Sem campeao"}), 400
+
+    result = BeltChampion.process_challenge_result(
+        challenger_score, champion_score, current_user, champion
+    )
+
+    return jsonify(result)
+
 def update_ranking():
     """Atualiza posições de ranking por categoria"""
     from app.models import User
