@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from app.models import Module, Question, UserProgress, BattleHistory
 from app.utils import CodeExecutor
+from app.utils.belt_system import ResurrectionChallenge, BeltChampion
 from app import db
 from datetime import date
 
