@@ -205,9 +205,15 @@ for i in range(5):
             executeBtn.disabled = true;
 
             try {
+                // Obter CSRF token do cookie
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
                 const response = await fetch('/api/code/execute', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
                     body: JSON.stringify({
                         code: code,
                         input: inputArea.value

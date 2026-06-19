@@ -223,6 +223,7 @@
             <div id="codeSnippet" class="code-snippet" style="display: none;"></div>
 
             <form id="quizForm" style="display: none;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div id="optionsContainer" class="options-container"></div>
                 <input type="text" id="textAnswer" class="input-answer" placeholder="Digite sua resposta..." style="display: none;">
 
@@ -309,10 +310,14 @@
 
         async function submitQuiz() {
             const correctCount = Object.values(answers).filter(a => a.correct).length;
+            const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
             const response = await fetch('/api/progress/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
                 body: JSON.stringify({
                     module_id: moduleId,
                     correct: correctCount,
@@ -331,7 +336,7 @@
             const resultHTML = `
                 <div style="text-align: center; padding: 2rem;">
                     <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
-                        ${result.result === 'knockout' ? '💥 NOCAUTE!' : result.result === 'win' ? '✅ VITÓRIA!' : '❌ DERROTA'}
+                        ${result.result === 'knockout' ? '[NOCAUTE]' : result.result === 'win' ? '[VITORIA]' : '[DERROTA]'}
                     </h1>
                     <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
                         ${correctCount} de ${questions.length} respostas corretas
@@ -345,12 +350,12 @@
                         <div style="background: var(--secondary); color: white; padding: 1.5rem; border-radius: 8px;">
                             <p style="font-size: 0.9rem;">Seu XP Total</p>
                             <p style="font-size: 2rem; font-weight: bold;">${result.total_xp}</p>
-                            <p style="font-size: 0.9rem;">Posição: #${result.ranking_position}</p>
+                            <p style="font-size: 0.9rem;">Posicao: #${result.ranking_position}</p>
                         </div>
                     </div>
                     <div style="background: var(--light); padding: 1.5rem; border-radius: 8px; margin: 2rem 0;">
                         <p style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">
-                            🔥 Combo: ${result.streak} dias
+                            Combo: ${result.streak} dias
                         </p>
                         <p style="color: #666;">Continue respondendo todos os dias para manter seu combo!</p>
                     </div>
@@ -363,6 +368,14 @@
 
         document.getElementById('quizForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Se o quiz já foi finalizado, submeter resultados
+            if (quizFinished) {
+                document.getElementById('submitBtn').disabled = true;
+                await submitQuiz();
+                return;
+            }
+
             const q = questions[currentQuestion];
             let answer;
 
@@ -395,14 +408,6 @@
                 quizFinished = true;
                 document.getElementById('submitBtn').textContent = 'Finalizar e Enviar';
                 document.getElementById('skipBtn').style.display = 'none';
-            }
-        });
-
-        document.getElementById('submitBtn').addEventListener('click', async (e) => {
-            if (quizFinished && e.target.textContent === 'Finalizar e Enviar') {
-                e.preventDefault();
-                document.getElementById('submitBtn').disabled = true;
-                await submitQuiz();
             }
         });
 
