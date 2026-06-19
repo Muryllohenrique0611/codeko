@@ -242,7 +242,7 @@
         <div class="progress-sidebar">
             <div class="progress-title">Progresso</div>
             <div class="question-counter" id="questionCounter">1/10</div>
-            <div class="timer" id="timer">10:00</div>
+            <div class="timer" id="timer">00:00</div>
             <div class="progress-bar-container">
                 <div class="progress-bar" id="progressBar" style="width: 10%;"></div>
             </div>
@@ -259,6 +259,16 @@
         let answers = {};
         let moduleId = {{ module_id }};
         let quizFinished = false;
+        let questionAnswered = false;
+
+        // Cronômetro de TEMPO GASTO (conta para cima, sem pressão de tempo limite)
+        let elapsedSeconds = 0;
+        let timerInterval = setInterval(() => {
+            elapsedSeconds++;
+            const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const seconds = String(elapsedSeconds % 60).padStart(2, '0');
+            document.getElementById('timer').textContent = `${minutes}:${seconds}`;
+        }, 1000);
 
         async function loadQuestions() {
             const response = await fetch(`/api/questions?module_id=${moduleId}&limit=10`);
@@ -285,9 +295,10 @@
             const optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
 
-            const options = JSON.parse(q.options);
+            const options = q.options;
 
             if (q.type === 'multiple_choice' || q.type === 'true_false') {
+                document.getElementById('textAnswer').style.display = 'none';
                 options.forEach((option, idx) => {
                     const label = document.createElement('label');
                     label.className = 'option';
@@ -297,15 +308,27 @@
                     `;
                     optionsContainer.appendChild(label);
                 });
+                // Habilita o botão somente quando uma alternativa for selecionada
+                optionsContainer.querySelectorAll('input[name="answer"]').forEach(input => {
+                    input.addEventListener('change', () => {
+                        document.getElementById('submitBtn').disabled = false;
+                    });
+                });
             } else if (q.type === 'code_gap') {
                 document.getElementById('textAnswer').style.display = 'block';
                 document.getElementById('textAnswer').value = '';
                 document.getElementById('textAnswer').focus();
+                // Habilita o botão somente quando houver texto digitado
+                document.getElementById('textAnswer').addEventListener('input', (e) => {
+                    document.getElementById('submitBtn').disabled = e.target.value.trim() === '';
+                });
             }
 
             document.getElementById('explanation').classList.remove('show');
             document.getElementById('quizForm').style.display = 'block';
             document.getElementById('submitBtn').textContent = 'Responder';
+            document.getElementById('submitBtn').disabled = true;
+            questionAnswered = false;
         }
 
         async function submitQuiz() {
@@ -372,9 +395,13 @@
             // Se o quiz já foi finalizado, submeter resultados
             if (quizFinished) {
                 document.getElementById('submitBtn').disabled = true;
+                clearInterval(timerInterval);
                 await submitQuiz();
                 return;
             }
+
+            // Trava contra duplo-clique/duplo-submit, que causava o bug de pular questão
+            if (questionAnswered) return;
 
             const q = questions[currentQuestion];
             let answer;
@@ -390,7 +417,27 @@
                 return;
             }
 
-            answers[q.id] = { answer, correct: answer === q.correct_answer };
+            questionAnswered = true;
+            document.getElementById('submitBtn').disabled = true;
+
+            const isCorrect = answer === q.correct_answer;
+            answers[q.id] = { answer, correct: isCorrect };
+
+            // Destaque visual nas alternativas (verde = correta, vermelho = errada escolhida)
+            if (q.type === 'multiple_choice' || q.type === 'true_false') {
+                document.querySelectorAll('.option').forEach(label => {
+                    const input = label.querySelector('input[name="answer"]');
+                    input.disabled = true;
+                    if (input.value === q.correct_answer) {
+                        label.classList.add('correct');
+                    } else if (input.checked && !isCorrect) {
+                        label.classList.add('incorrect');
+                    }
+                });
+            } else if (q.type === 'code_gap') {
+                document.getElementById('textAnswer').disabled = true;
+                document.getElementById('textAnswer').style.borderColor = isCorrect ? '#4CAF50' : '#FF6B6B';
+            }
 
             const correctCount = Object.values(answers).filter(a => a.correct).length;
             document.getElementById('correctCount').textContent = correctCount;
@@ -407,12 +454,15 @@
             } else {
                 quizFinished = true;
                 document.getElementById('submitBtn').textContent = 'Finalizar e Enviar';
+                document.getElementById('submitBtn').disabled = false;
                 document.getElementById('skipBtn').style.display = 'none';
             }
         });
 
         document.getElementById('skipBtn').addEventListener('click', () => {
+            if (questionAnswered) return;
             if (currentQuestion < questions.length - 1) {
+                questionAnswered = true;
                 answers[questions[currentQuestion].id] = { answer: null, correct: false };
                 currentQuestion++;
                 displayQuestion();
