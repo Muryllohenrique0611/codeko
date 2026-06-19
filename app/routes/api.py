@@ -4,7 +4,7 @@ from app.models import Module, Question, UserProgress, BattleHistory
 from app.utils import CodeExecutor
 from app.utils.belt_system import ResurrectionChallenge, BeltChampion
 from app import db
-from datetime import date
+from datetime import date, datetime
 
 api_bp = Blueprint("api", __name__)
 
