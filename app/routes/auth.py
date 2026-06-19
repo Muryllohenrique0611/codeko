@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, url_for, session, request, flash, render_
 from flask_login import login_user, logout_user, login_required
 from app.models import User
 from app import db
-import requests
+import requests as http_requests
 import os
 
 # Apenas em desenvolvimento
@@ -17,7 +17,7 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 
 
 def get_google_provider_cfg():
-    return requests.get(GOOGLE_DISCOVERY_URL).json()
+    return http_requests.get(GOOGLE_DISCOVERY_URL).json()
 
 
 @auth_bp.route("/login")
@@ -55,7 +55,7 @@ def callback():
         code=code,
     )
 
-    token_response = requests.post(
+    token_response = http_requests.post(
         token_url,
         headers=headers,
         data=body,
@@ -66,7 +66,7 @@ def callback():
 
     userinfo_endpoint = google_cfg["userinfo_endpoint"]
     uri, headers, body = client.add_token(userinfo_endpoint)
-    userinfo_response = requests.get(uri, headers=headers, data=body)
+    userinfo_response = http_requests.get(uri, headers=headers, data=body)
     userinfo = userinfo_response.json()
 
     google_id = userinfo["sub"]
