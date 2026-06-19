@@ -5,8 +5,9 @@ from app import db
 import requests
 import os
 
-# Permitir HTTP em desenvolvimento
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
+# Apenas em desenvolvimento
+if os.environ.get("FLASK_ENV") == "development":
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = 'true'
 
 auth_bp = Blueprint("auth", __name__)
 
