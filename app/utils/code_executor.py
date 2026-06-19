@@ -46,7 +46,6 @@ sys.stdout = sys.stderr = open(__import__('os').devnull, 'w')
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=timeout,
             )
 
             stdout, stderr = process.communicate(timeout=timeout)
@@ -70,6 +69,7 @@ sys.stdout = sys.stderr = open(__import__('os').devnull, 'w')
 
         except subprocess.TimeoutExpired:
             # Código demorou muito
+            process.kill()
             return {
                 "success": False,
                 "output": "",
@@ -143,7 +143,6 @@ sys.stdout = sys.stderr = open(__import__('os').devnull, 'w')
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                timeout=timeout,
             )
 
             stdout, stderr = process.communicate(input=test_input, timeout=timeout)
@@ -164,6 +163,7 @@ sys.stdout = sys.stderr = open(__import__('os').devnull, 'w')
             }
 
         except subprocess.TimeoutExpired:
+            process.kill()
             return {
                 "success": False,
                 "output": "",
