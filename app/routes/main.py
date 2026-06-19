@@ -43,3 +43,9 @@ def quiz(module_id):
     from app.models import Module
     module = Module.query.get_or_404(module_id)
     return render_template("quiz.html", user=current_user, module=module, module_id=module_id)
+
+
+@main_bp.route("/code-executor")
+@login_required
+def code_executor():
+    return render_template("code_executor.html", user=current_user)

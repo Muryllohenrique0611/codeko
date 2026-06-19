@@ -116,6 +116,7 @@
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('main.home') }}">Home</a>
                 <a href="{{ url_for('main.modules') }}">Módulos</a>
+                <a href="{{ url_for('main.code_executor') }}">Code Executor</a>
                 <a href="{{ url_for('main.profile') }}">Perfil</a>
                 <a href="{{ url_for('main.ranking') }}">Ranking</a>
                 <a href="{{ url_for('auth.logout') }}">Sair</a>

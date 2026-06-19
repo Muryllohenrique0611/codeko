@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from app.models import Module, Question, UserProgress, BattleHistory
+from app.utils import CodeExecutor
 from app import db
 from datetime import date
 
@@ -234,7 +235,47 @@ def submit_task():
     })
 
 
-# --- Ranking ---
+# --- Execução de Código ---
+
+@api_bp.route("/code/execute", methods=["POST"])
+@login_required
+def execute_code():
+    """Executa código Python de forma segura."""
+    data = request.get_json()
+    code = data.get("code", "")
+    test_input = data.get("input", "")
+
+    if not code:
+        return jsonify({"error": "Código vazio"}), 400
+
+    # Validar código antes de executar
+    validation = CodeExecutor.validate_code(code)
+    if not validation["valid"]:
+        return jsonify({
+            "success": False,
+            "error": "Código contém construções não permitidas",
+            "warnings": validation["warnings"]
+        }), 400
+
+    # Executar código
+    result = CodeExecutor.execute_with_input(code, test_input, timeout=5)
+
+    return jsonify(result)
+
+
+@api_bp.route("/code/validate", methods=["POST"])
+@login_required
+def validate_code():
+    """Valida código sem executar."""
+    data = request.get_json()
+    code = data.get("code", "")
+
+    if not code:
+        return jsonify({"error": "Código vazio"}), 400
+
+    validation = CodeExecutor.validate_code(code)
+
+    return jsonify(validation)
 
 def update_ranking():
     """Atualiza posições de ranking por categoria"""
